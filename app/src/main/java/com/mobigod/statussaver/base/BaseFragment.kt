@@ -23,7 +23,7 @@ abstract class BaseFragment<T: ViewDataBinding>: DaggerFragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-       // AndroidSupportInjection.inject(this)
+        AndroidSupportInjection.inject(this)
         super.onCreate(savedInstanceState)
     }
 

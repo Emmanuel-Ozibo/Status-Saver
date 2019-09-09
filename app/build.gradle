@@ -52,12 +52,12 @@ dependencies {
     implementation "com.jakewharton.rxbinding3:rxbinding:${rootProject.rx_binding}"
 
     //UI
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.github.himangipatel:ImagesPreview:0.0.5'
-    implementation 'com.github.halilozercan:BetterVideoPlayer:2.0.0-alpha01'
-    implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
-    implementation 'com.github.clans:fab:1.6.4'
-    implementation 'com.snatik:storage:2.1.0'
+    implementation "com.google.android.material:material:${rootProject.material_app}"
+    implementation "com.github.himangipatel:ImagesPreview:${rootProject.image_preview}"
+    implementation "com.github.halilozercan:BetterVideoPlayer:${rootProject.video_player}"
+    implementation "jp.wasabeef:recyclerview-animators:${rootProject.recycler_view_anim}"
+    implementation "com.github.clans:fab:${rootProject.material_fab}"
+    implementation "com.github.takusemba:spotlight:${rootProject.spotlight_version}"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

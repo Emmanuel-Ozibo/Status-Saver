@@ -29,6 +29,12 @@ ext{
     dagger_version = '2.24'
     rx_kotlin = '2.4.0'
     rx_binding = '3.0.0'
+    material_app = '1.0.0'
+    image_preview = '0.0.5'
+    video_player = '2.0.0-alpha01'
+    recycler_view_anim = '3.0.0'
+    material_fab = '1.6.4'
+    spotlight_version = '1.8.0'
 }
 
 task clean(type: Delete) {

@@ -1,5 +1,6 @@
 package com.mobigod.statussaver.ui.saver.fragment
 
+import android.app.Activity
 import android.view.View
 import android.widget.AbsListView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -27,7 +28,15 @@ import javax.inject.Inject
 import com.mobigod.statussaver.ui.saver.adapter.decos.SpacesItemDecoration
 import com.himangi.imagepreview.ImagePreviewActivity
 import android.content.Intent
+import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
+import com.mobigod.statussaver.data.local.PreferenceManager
+import com.mobigod.statussaver.global.Tools
+import com.mobigod.statussaver.global.longToastWith
+import com.takusemba.spotlight.OnSpotlightStateChangedListener
+import com.takusemba.spotlight.Spotlight
+import com.takusemba.spotlight.shape.RoundedRectangle
+import com.takusemba.spotlight.target.SimpleTarget
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
 import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter
@@ -45,6 +54,7 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
     lateinit var retryClicks: Flowable<Unit>
 
     @Inject lateinit var fileSystemManager: FileSystemManager
+    @Inject lateinit var prefManager: PreferenceManager
 
     override fun getLayoutRes() = R.layout.fragment_images
 
@@ -60,9 +70,8 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
 
         val glide = Glide.with(this)
 
-
-        mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide) {
-            item, items, position ->
+        mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide,{
+                _, items, position ->
 
             val previewFileList = ArrayList<PreviewFile>()
             items.forEach {
@@ -73,7 +82,9 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
             intent.putExtra(ImagePreviewActivity.IMAGE_LIST, previewFileList)
             intent.putExtra(ImagePreviewActivity.CURRENT_ITEM, position)
             startActivity(intent)
-        }
+        }, {
+            setUpTreeObserver(it)
+        })
 
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.space)
 
@@ -137,8 +148,31 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
                     retryClicks.toObservable()
                 }
             }
-
         }
+
+    }
+
+
+
+    private fun setUpTreeObserver(view: View) {
+        binding.root.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                //start spot light
+                if (prefManager.isFirstRun) {
+                    //show spotlight
+                   // val item = binding.imagesRv
+                    val shape = RoundedRectangle(view.height.toFloat(), view.width.toFloat(), 5f)
+
+                    val simpleTarget = Tools.createSimpleSpotLightShape(activity as Activity, view,
+                        shape, "Click an item to save",
+                        "You can save and share files")
+                    Tools.startSpotLight(activity as Activity, simpleTarget)
+                    prefManager.isFirstRun = false
+                }
+            }
+
+        })
     }
 
 }

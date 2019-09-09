@@ -10,5 +10,7 @@ class PreferenceManager @Inject constructor(val sPref: SharedPreferences) {
     get() {return sPref.getBoolean("isFirstTime", false)}
     set(value) {sPref.edit().putBoolean("isFirstTime", value).apply()}
 
-
+    var isFirstRun: Boolean
+    get() {return sPref.getBoolean("isFirstRun", true)}
+    set(value) {sPref.edit().putBoolean("isFirstRun", value).apply()}
 }

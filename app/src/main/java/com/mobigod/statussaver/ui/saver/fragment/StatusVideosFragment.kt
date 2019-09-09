@@ -55,11 +55,13 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
         val glide = Glide.with(this)
 
 
-        mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide) {
-                item, items, position ->
+        mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide, {
+                item, _, _ ->
 
             VideoPlayerActivity.start(context!!, item.file.absolutePath)
-        }
+        }, {
+
+        })
 
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.space)
 

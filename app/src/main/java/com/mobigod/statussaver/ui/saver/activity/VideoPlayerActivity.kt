@@ -13,8 +13,8 @@ import com.mobigod.statussaver.databinding.ActivityVideoPlayerBinding
 import com.mobigod.statussaver.global.Constants
 import com.mobigod.statussaver.global.getUri
 import java.io.File
-import com.snatik.storage.Storage
 import android.os.Environment
+import android.widget.Toast
 import com.mobigod.statussaver.global.Tools
 import com.mobigod.statussaver.global.longToastWith
 
@@ -28,19 +28,17 @@ class VideoPlayerActivity: AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_video_player)
 
         val mVideoUrl = intent.getStringExtra(Constants.INTENT_VIDEO_URL)
+        val file = File(mVideoUrl)
+
 
         binding.player.apply {
-            setSource(File(mVideoUrl).getUri())
+            setSource(file.getUri())
             removeCaptions()
         }
 
         binding.saveVid.setOnClickListener {
-            /*val nd = Environment.getExternalStorageDirectory()
-            val toPath = nd.absolutePath + "${getString(R.string.app_name)}/${File(mVideoUrl).name}.mp4"
-            val storage = Storage(applicationContext)
-            storage.copy(mVideoUrl, toPath)*/
-
-            longToastWith("Not yet implemented!!!!!,\n You can send in a PR to the project on github:)")
+            Tools.saveStatus(file.absolutePath)
+            longToastWith("Well done, Status saved")
 
         }
 
@@ -71,7 +69,7 @@ class VideoPlayerActivity: AppCompatActivity() {
 
 
     companion object {
-        fun start(context: Context, videoUrl: String){
+        fun start(context: Context, videoUrl: String) {
             Intent(context, VideoPlayerActivity::class.java).apply {
                 putExtra(Constants.INTENT_VIDEO_URL, videoUrl)
             }.also {

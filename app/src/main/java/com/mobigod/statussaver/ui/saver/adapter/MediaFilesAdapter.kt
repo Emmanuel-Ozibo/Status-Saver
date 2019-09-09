@@ -20,11 +20,14 @@ import com.bumptech.glide.request.RequestOptions
 
 
 class MediaFilesAdapter(val options: RequestOptions, val glide: RequestBuilder<Bitmap>, val glideMain: RequestManager,
-                        val onitemClick: (MediaItemModel, List<MediaItemModel>, position: Int) -> Unit): RecyclerView.Adapter<MediaFilesAdapter.MediaFilesViewHolder>() {
+                        val onitemClick: (MediaItemModel, List<MediaItemModel>, position: Int) -> Unit,
+                        val onItem: (View) -> Unit):
+                        RecyclerView.Adapter<MediaFilesAdapter.MediaFilesViewHolder>() {
     val mediaItems = mutableListOf<MediaItemModel>()
 
     lateinit var binding: MediaItemLayoutBinding
     var context: Context? = null
+    var itemView: View? = null
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaFilesViewHolder {
@@ -35,9 +38,13 @@ class MediaFilesAdapter(val options: RequestOptions, val glide: RequestBuilder<B
 
     override fun getItemCount() = mediaItems.size
 
-    override fun onBindViewHolder(holder: MediaFilesViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MediaFilesViewHolder, position: Int){
         holder.itemView.setOnClickListener {
             onitemClick(mediaItems[position], mediaItems, position)
+        }
+
+        if (position == 0){
+            onItem(holder.itemView)
         }
         holder.bindView(position)
     }
@@ -52,7 +59,9 @@ class MediaFilesAdapter(val options: RequestOptions, val glide: RequestBuilder<B
         notifyDataSetChanged()
     }
 
-    private fun removeAllItems(){
+    fun getFirstItem() = itemView
+
+    private fun removeAllItems() {
         mediaItems.removeAllItems()
         notifyDataSetChanged()
     }
