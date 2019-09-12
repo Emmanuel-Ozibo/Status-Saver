@@ -10,7 +10,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.himangi.imagepreview.PreviewFile
-import com.jakewharton.rxbinding3.view.clicks
 import com.mobigod.statussaver.R
 import com.mobigod.statussaver.base.BaseFragment
 import com.mobigod.statussaver.data.local.FileSystemManager
@@ -30,24 +29,22 @@ import com.himangi.imagepreview.ImagePreviewActivity
 import android.content.Intent
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.jakewharton.rxbinding2.view.clicks
 import com.mobigod.statussaver.data.local.PreferenceManager
 import com.mobigod.statussaver.global.Tools
-import com.mobigod.statussaver.global.longToastWith
-import com.takusemba.spotlight.OnSpotlightStateChangedListener
-import com.takusemba.spotlight.Spotlight
+import com.mobigod.statussaver.global.hide
 import com.takusemba.spotlight.shape.RoundedRectangle
-import com.takusemba.spotlight.target.SimpleTarget
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
+import io.reactivex.android.plugins.RxAndroidPlugins
+import io.reactivex.plugins.RxJavaPlugins
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
-import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter
 
 
 /**
  * Guy!!!!!, you can actually merge this class with StatusVideoFragment and maybe use some enum to differentiate the
  * View types
  */
-class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
-
+class StatusImagesFragment : BaseFragment<FragmentImagesBinding>() {
     private lateinit var mAdapter: MediaFilesAdapter
 
     lateinit var binding: FragmentImagesBinding
@@ -86,6 +83,11 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
             setUpTreeObserver(it)
         })
 
+        binding.swipeRefImage.setOnRefreshListener {
+            mAdapter.addAll(mutableListOf())
+            refreshLayout()
+        }
+
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.space)
 
         //Preventing view from being recycled
@@ -115,16 +117,25 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
             adapter = slideInFromBottomAnimator
         }
 
+        refreshLayout()
+
+    }
+
+
+    private fun refreshLayout() {
         fileSystemManager.getAllStatusImages(object: SingleObserver<List<File>>() {
 
             override fun onSubscribe(d: Disposable) {
                 super.onSubscribe(d)
-                binding.errorView.visibility = View.GONE
+                binding.errorView.hide()
             }
 
 
             override fun onNext(t: List<File>) {
                 //populate the rv
+                if(binding.swipeRefImage.isRefreshing){
+                    binding.swipeRefImage.isRefreshing = false
+                }
                 mAdapter.addAll(t.map { file -> MediaItemModel(
                     MediaItemType.IMAGE_MEDIA,
                     file
@@ -140,7 +151,7 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>(){
         }) {
             it.retryWhen {
                 it.flatMap {
-                    err ->
+                        err ->
                     err.printStackTrace()
                     val message = err.message
                     binding.errorTxt.text = message

@@ -4,7 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.widget.TextView
+import androidx.appcompat.app.ActionBarDrawerToggle
 import com.himangi.imagepreview.PreviewFile
+import com.mobigod.statussaver.BuildConfig
 import com.mobigod.statussaver.R
 import com.mobigod.statussaver.base.BaseActivity
 import com.mobigod.statussaver.databinding.ActivityStatusSaverBinding
@@ -25,6 +28,17 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
         binding = getBinding()
         binding.ssaverToolbar.toolbar.title = "Status Saver"
 
+        val actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.drawerLayout,
+            binding.ssaverToolbar.toolbar,
+            R.string.open_drawer, R.string.close_drawer)
+
+        binding.navView.getHeaderView(0)
+            .rootView.findViewById<TextView>(R.id.version_number)
+            .text = BuildConfig.VERSION_NAME
+
+
+
+        actionBarDrawerToggle.syncState()
 
         if(!Tools.checkPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Tools.askReadStoragePermission(this, READ_EXTERNAL_STORAGE_ID)

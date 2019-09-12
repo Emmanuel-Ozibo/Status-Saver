@@ -1,6 +1,6 @@
 package com.mobigod.statussaver.ui.saver.fragment
 
-import android.content.Intent
+
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.AbsListView
@@ -9,9 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.himangi.imagepreview.ImagePreviewActivity
-import com.himangi.imagepreview.PreviewFile
-import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding2.view.clicks
 import com.mobigod.statussaver.R
 import com.mobigod.statussaver.base.BaseFragment
 import com.mobigod.statussaver.data.local.FileSystemManager
@@ -29,6 +27,8 @@ import io.reactivex.disposables.Disposable
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
 import java.io.File
 import javax.inject.Inject
+
+
 
 class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
 
@@ -63,6 +63,11 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
 
         })
 
+        binding.swipeToRef.setOnRefreshListener {
+            mAdapter.addAll(mutableListOf())
+            refreshLayout()
+        }
+
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.space)
 
         //Preventing view from being recycled
@@ -92,6 +97,11 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
             adapter = slideInFromBottomAnimator
         }
 
+        refreshLayout()
+
+    }
+
+    private fun refreshLayout()  {
         fileSystemManager.getAllStatusVideos(object: SingleObserver<List<File>>() {
 
             override fun onSubscribe(d: Disposable) {
@@ -102,6 +112,9 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
 
             override fun onNext(t: List<File>) {
                 //populate the rv
+                if (binding.swipeToRef.isRefreshing){
+                    binding.swipeToRef.isRefreshing = false
+                }
                 mAdapter.addAll(t.map { file -> MediaItemModel(
                     MediaItemType.VIDEO_MEDIA,
                     file
@@ -127,7 +140,6 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
             }
 
         }
-
     }
 
 }
