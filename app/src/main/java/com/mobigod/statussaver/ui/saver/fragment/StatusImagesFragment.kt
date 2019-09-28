@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.himangi.imagepreview.PreviewFile
 import com.mobigod.statussaver.R
@@ -29,14 +28,13 @@ import com.himangi.imagepreview.ImagePreviewActivity
 import android.content.Intent
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.jakewharton.rxbinding2.view.clicks
 import com.mobigod.statussaver.data.local.PreferenceManager
+import com.mobigod.statussaver.data.model.AdItemModel
+import com.mobigod.statussaver.data.model.BaseItemModel
 import com.mobigod.statussaver.global.Tools
 import com.mobigod.statussaver.global.hide
 import com.takusemba.spotlight.shape.RoundedRectangle
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
 
 
@@ -64,21 +62,47 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>() {
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .skipMemoryCache(true)
 
-
         val glide = Glide.with(this)
 
         mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide,{
                 _, items, position ->
 
+            val itemClicked = items[position]
+            if (itemClicked is AdItemModel) {
+                //respond to clicked ads
+                showToast("MY GUY NAH ADS YOU CLICK SO O...")
+                return@MediaFilesAdapter
+            }
+
             val previewFileList = ArrayList<PreviewFile>()
             items.forEach {
-                previewFileList.add(PreviewFile(it.file.absolutePath, ""))
+                if (it is MediaItemModel) {
+                    previewFileList.add(
+                        PreviewFile(it.file.absolutePath, "")
+                    )
+                }
             }
+
+
+            //get the current position in the list
+            //get the number of ads before that position
+            //subtract that value from the list
+            val adsB4List = mutableListOf<AdItemModel>()
+            val subList = items.subList(0, position)
+            subList.forEach {
+                if (it is AdItemModel){
+                    adsB4List.add(it)
+                }
+            }
+
+            val absoluteClickedPosition = position - adsB4List.size
 
             val intent = Intent(activity, ImagePreviewActivity::class.java)
             intent.putExtra(ImagePreviewActivity.IMAGE_LIST, previewFileList)
-            intent.putExtra(ImagePreviewActivity.CURRENT_ITEM, position)
+            intent.putExtra(ImagePreviewActivity.CURRENT_ITEM, absoluteClickedPosition)
+
             startActivity(intent)
+
         }, {
             setUpTreeObserver(it)
         })
@@ -133,13 +157,28 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>() {
 
             override fun onNext(t: List<File>) {
                 //populate the rv
-                if(binding.swipeRefImage.isRefreshing){
+                if(binding.swipeRefImage.isRefreshing) {
                     binding.swipeRefImage.isRefreshing = false
                 }
-                mAdapter.addAll(t.map { file -> MediaItemModel(
-                    MediaItemType.IMAGE_MEDIA,
-                    file
-                ) }.toMutableList())
+
+                val l = mutableListOf<BaseItemModel>()
+
+                for (i in t) {
+                    l.add(MediaItemModel(MediaItemType.IMAGE_MEDIA, i))
+                }
+
+                val defaultAdSize = 3
+                //val x = getNumberOfAds(defaultAdSize, list)
+                for (i in 0 until defaultAdSize) {
+                    try {
+                        l.add((i * defaultAdSize) + 2, AdItemModel())
+                    }catch (e: Exception){
+                        print("There was an exception")
+                    }
+
+                }
+
+                mAdapter.addAll(l)
 
             }
 

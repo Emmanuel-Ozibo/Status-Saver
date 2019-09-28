@@ -7,4 +7,5 @@
     <string name="close_drawer">Close Drawer</string>
     <string name="open_drawer">Open Drawer</string>
     <string name="status_builder">Status Builder</string>
+    <string name="admob_app_id">ca-app-pub-4034907636164501~7154614872</string>
 </resources>

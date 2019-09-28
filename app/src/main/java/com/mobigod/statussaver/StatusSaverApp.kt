@@ -1,15 +1,17 @@
 package com.mobigod.statussaver
 
-import android.app.Activity
 import android.app.Application
-import com.mobigod.statussaver.di.AppComponent
+import android.content.Context
+import androidx.multidex.MultiDex
+import androidx.multidex.MultiDexApplication
 import com.mobigod.statussaver.di.DaggerAppComponent
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import javax.inject.Inject
+import com.google.android.gms.ads.MobileAds
 
-class StatusSaverApp: Application(), HasAndroidInjector {
+class StatusSaverApp: MultiDexApplication(), HasAndroidInjector {
 
     @Inject
     lateinit var activityDispatchingAndroidInjector: DispatchingAndroidInjector<Any>
@@ -20,9 +22,12 @@ class StatusSaverApp: Application(), HasAndroidInjector {
          DaggerAppComponent
             .builder()
             .application(this)
-            .build()
-             .inject(this)
+            .build().inject(this)
+    }
 
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        MultiDex.install(this)
     }
 
     override fun androidInjector(): AndroidInjector<Any> {

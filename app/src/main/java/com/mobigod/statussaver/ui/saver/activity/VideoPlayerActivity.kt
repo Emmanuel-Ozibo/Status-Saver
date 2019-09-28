@@ -40,7 +40,8 @@ class VideoPlayerActivity: BaseActivity<ActivityVideoPlayerBinding>() {
         }
 
         binding.saveVid.setOnClickListener {
-            fileSystemManager.saveStatus(file.absolutePath)
+            //fileSystemManager.saveStatus(file.absolutePath)
+            fileSystemManager.saveVideoFile(this, file.absolutePath)
             longToastWith("Well done, Status saved")
 
         }
@@ -55,6 +56,19 @@ class VideoPlayerActivity: BaseActivity<ActivityVideoPlayerBinding>() {
 
     override fun getLayoutRes(): Int =  R.layout.activity_video_player
 
+    override fun onPause() {
+        super.onPause()
+        binding.player.pause()
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        if(!binding.player.isPlaying()){
+            binding.player.start()
+        }
+
+    }
 
 
     companion object {

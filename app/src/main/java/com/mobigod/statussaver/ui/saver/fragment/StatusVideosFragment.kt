@@ -13,6 +13,8 @@ import com.jakewharton.rxbinding2.view.clicks
 import com.mobigod.statussaver.R
 import com.mobigod.statussaver.base.BaseFragment
 import com.mobigod.statussaver.data.local.FileSystemManager
+import com.mobigod.statussaver.data.model.AdItemModel
+import com.mobigod.statussaver.data.model.BaseItemModel
 import com.mobigod.statussaver.data.model.MediaItemModel
 import com.mobigod.statussaver.databinding.FragmentVideosBinding
 import com.mobigod.statussaver.global.show
@@ -58,7 +60,13 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
         mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide, {
                 item, _, _ ->
 
-            VideoPlayerActivity.start(context!!, item.file.absolutePath)
+            if (item is MediaItemModel){
+                VideoPlayerActivity.start(context!!, item.file.absolutePath)
+                return@MediaFilesAdapter
+            }
+
+            showToast("NAH AD YOU CLICK SO OOO")
+
         }, {
 
         })
@@ -115,10 +123,25 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
                 if (binding.swipeToRef.isRefreshing){
                     binding.swipeToRef.isRefreshing = false
                 }
-                mAdapter.addAll(t.map { file -> MediaItemModel(
-                    MediaItemType.VIDEO_MEDIA,
-                    file
-                ) }.toMutableList())
+
+                val l = mutableListOf<BaseItemModel>()
+
+                for (i in t) {
+                    l.add(MediaItemModel(MediaItemType.VIDEO_MEDIA, i))
+                }
+
+                val defaultAdSize = 3
+                //val x = getNumberOfAds(defaultAdSize, list)
+                for (i in 0 until defaultAdSize) {
+                    try {
+                        l.add((i * defaultAdSize) + 3, AdItemModel())
+                    }catch (e: Exception){
+                        print("There was an exception")
+                    }
+
+                }
+
+                mAdapter.addAll(l)
 
             }
 

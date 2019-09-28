@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
+import com.google.android.gms.ads.MobileAds
 import com.himangi.imagepreview.PreviewFile
 import com.mobigod.statussaver.BuildConfig
 import com.mobigod.statussaver.R
@@ -27,6 +28,11 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
         //this is just like onCreate method
         binding = getBinding()
         binding.ssaverToolbar.toolbar.title = "Status Saver"
+
+        // Initialize the Mobile Ads SDK.
+        MobileAds.initialize(this,
+            getString(R.string.admob_app_id))
+
 
         val actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.drawerLayout,
             binding.ssaverToolbar.toolbar,

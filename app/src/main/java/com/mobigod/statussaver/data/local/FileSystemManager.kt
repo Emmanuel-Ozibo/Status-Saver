@@ -1,20 +1,22 @@
 package com.mobigod.statussaver.data.local
 
+import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.os.Environment
-import android.preference.PreferenceManager
-import android.util.Log
+import android.os.SystemClock
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.core.net.toUri
 import io.reactivex.*
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.internal.operators.flowable.FlowableRetryWhen
 import io.reactivex.schedulers.Schedulers
+import org.apache.commons.io.FileUtils
 import java.io.*
-import java.net.URI
-import java.util.*
 import javax.inject.Inject
 
 
@@ -58,7 +60,7 @@ class FileSystemManager @Inject constructor(private val context: Context): IFile
         fileObservable.subscribe(observer)
     }
 
-    override fun  getAllStatusVideos(observer: Observer<List<File>>, observable: (Observable<List<File>>) -> Unit){
+    override fun  getAllStatusVideos(observer: Observer<List<File>>, observable: (Observable<List<File>>) -> Unit) {
         //get all files through an observable
         val fileObservable = Observable.create {
                 emitter: ObservableEmitter<List<File>> ->
@@ -90,71 +92,56 @@ class FileSystemManager @Inject constructor(private val context: Context): IFile
         fileObservable.subscribe(observer)
     }
 
-    fun saveStatus(path: String) {
-        val rootDirectory = Environment.getExternalStorageDirectory()
-        val desFileName = rootDirectory.absolutePath + "/Status Saver/"
-        val newDir = File(desFileName)
-        if (!newDir.isDirectory && !newDir.exists()) {
-            val directoryCreated = newDir.mkdir()
-            if (directoryCreated) {
-                createNewFile(desFileName, path)
-            }
-        } else {
-            createNewFile(desFileName, path)
-        }
-    }
-
-
-    private fun createNewFile(desFileName: String, path: String) {
-        //create a new file
-        val savedStoryPath = desFileName + getName(path)
-        val SaveStoryFile = File(savedStoryPath)
-        if (!SaveStoryFile.isFile && !SaveStoryFile.exists()) {
-            Log.i("File Status", "Doesnt exist")
-            try {
-                val fileCreated = SaveStoryFile.createNewFile()
-                if (fileCreated) {
-                    Log.i("File Status", "File Created")
-                    copyStatusIntoFile(savedStoryPath, path)
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-        } else {
-            Log.i("File Status", "File already exists")
-        }
-    }
-
-
-
-    /**
-     * @param savedStoryPath This represents the new path we want to make
-     * @param path This is where it is coming from
-     */
-    private fun copyStatusIntoFile(savedStoryPath: String, path: String) {
+    fun saveVideoFile(context: Context, absolutePath: String) {
+        val videoNewPath = File(getAppFolder(context), SystemClock.currentThreadTimeMillis().toString() + ".mp4")
+        val srcFile = File(absolutePath)
+        FileUtils.copyFile(srcFile, videoNewPath)
         try {
-            val inComingChannel = FileInputStream(File(path)).getChannel()
-            val destinationChannel = FileOutputStream(File(savedStoryPath)).getChannel()
-
-            val id = destinationChannel.transferFrom(inComingChannel, 0, inComingChannel.size())
-            if (id > 0) {
-                Log.i("Copy Status: ", "Copied")
-                //give a notification that it has been done
-            } else {
-                Log.i("Copy Status: ", "Cant copy")
+            ContentValues().apply {
+                put(MediaStore.MediaColumns.DATA, videoNewPath.absolutePath)
+                put(MediaStore.MediaColumns.MIME_TYPE, "video/.mp4")
+                put(MediaStore.MediaColumns.DATE_MODIFIED, System.currentTimeMillis())
+            }.also {
+                context.contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, it)
+                Toast.makeText(context, "Video saved to Gallery", Toast.LENGTH_LONG).show()
             }
+        } catch (e: Exception){
 
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
-
     }
 
-    fun getName(path: String): String {
-        return UUID.randomUUID().toString()
+    private fun getWorkingDirectory(): File {
+        val directory = File(Environment.getExternalStorageDirectory(), "Status Saver")
+        if (!directory.exists()) {
+            directory.mkdir()
+        }
+
+        return directory
+    }
+
+
+    fun getAppFolder(context: Context): File {
+        val photoDirectory =
+            File(getWorkingDirectory().absolutePath, getAppName(context.applicationContext))
+        if (!photoDirectory.exists()) {
+            photoDirectory.mkdir()
+        }
+
+        return photoDirectory
+    }
+
+
+    private fun getAppName(context: Context): String {
+        val pm = context.applicationContext.packageManager
+
+        var ai: ApplicationInfo?
+        try {
+            ai = pm.getApplicationInfo(context.packageName, 0)
+        } catch (var4: PackageManager.NameNotFoundException) {
+            ai = null
+        }
+
+        return (if (ai != null) pm.getApplicationLabel(ai) else "(unknown)") as String
     }
 
 
