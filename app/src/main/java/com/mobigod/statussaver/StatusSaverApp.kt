@@ -10,6 +10,10 @@ import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import javax.inject.Inject
 import com.google.android.gms.ads.MobileAds
+import cafe.adriel.androidaudioconverter.callback.ILoadCallback
+import cafe.adriel.androidaudioconverter.AndroidAudioConverter
+
+
 
 class StatusSaverApp: MultiDexApplication(), HasAndroidInjector {
 
@@ -23,6 +27,16 @@ class StatusSaverApp: MultiDexApplication(), HasAndroidInjector {
             .builder()
             .application(this)
             .build().inject(this)
+
+        AndroidAudioConverter.load(this, object : ILoadCallback {
+            override fun onSuccess() {
+                // Great!
+            }
+            override fun onFailure(error: Exception) {
+                // FFmpeg is not supported by device
+            }
+        })
+
     }
 
     override fun attachBaseContext(base: Context) {

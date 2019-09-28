@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':lib_audio'
 rootProject.name='Status Saver'

@@ -13,4 +13,9 @@ class PreferenceManager @Inject constructor(val sPref: SharedPreferences) {
     var isFirstRun: Boolean
     get() {return sPref.getBoolean("isFirstRun", true)}
     set(value) {sPref.edit().putBoolean("isFirstRun", value).apply()}
+
+    var currentFileRecord: String?
+    get() {return sPref.getString("fileRec", "")}
+    set(value) {sPref.edit().putString("fileRec", value).apply()}
+
 }

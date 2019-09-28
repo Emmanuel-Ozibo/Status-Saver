@@ -26,6 +26,7 @@ import java.util.*
 
 
 object Tools {
+
     fun checkPermission(context: Context, permission: String) =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
@@ -34,6 +35,9 @@ object Tools {
             Manifest.permission.WRITE_EXTERNAL_STORAGE), id)
     }
 
+    fun askRecordAudioPermission(context: Activity, id: Int) {
+        ActivityCompat.requestPermissions(context, arrayOf(Manifest.permission.RECORD_AUDIO), id)
+    }
 
 
     fun decodeBitmapAsync(file: File, contentResolver: ContentResolver): Observable<Bitmap> {
@@ -46,7 +50,7 @@ object Tools {
     }
 
 
-    fun share(context: Context, path: String){
+    fun share(context: Context, path: String) {
         Intent(Intent.ACTION_SEND).apply {
             type = "video/mp4"
             putExtra(Intent.EXTRA_STREAM, File(path).getUri())
