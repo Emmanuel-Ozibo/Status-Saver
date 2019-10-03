@@ -22,6 +22,8 @@ import cafe.adriel.androidaudiorecorder.model.AudioChannel
 import android.media.MediaRecorder.AudioSource.MIC
 import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder
 import android.R.attr.colorPrimaryDark
+import android.app.Activity
+import android.net.Uri
 import android.os.Environment
 import android.os.SystemClock
 import android.util.Log
@@ -29,6 +31,7 @@ import cafe.adriel.androidaudioconverter.AndroidAudioConverter
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback
 import cafe.adriel.androidaudioconverter.model.AudioFormat
 import cafe.adriel.androidaudiorecorder.model.AudioSource
+import com.mobigod.lib_audio_cutter.AudioCutter
 import com.mobigod.statussaver.data.local.PreferenceManager
 import java.io.File
 import java.lang.Exception
@@ -44,6 +47,7 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
     private val READ_EXTERNAL_STORAGE_ID = 1
     private val AUDIO_REQUEST_CODE = 0
     private val RECORD_AUDIO_ID = 2
+    private val AUDIO_CUTTER_CODE = 3
 
 
     override fun initComponent() {
@@ -121,6 +125,7 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
         prefManager.currentFileRecord = filePath
 
         val color = resources.getColor(R.color.colorPrimaryDark)
+
         AndroidAudioRecorder.with(this)
             // Required
             .setFilePath(filePath)
@@ -147,33 +152,20 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
         return R.layout.activity_status_saver
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 0) {
-            if (resultCode == RESULT_OK) {
-                //start audio conversion
-                longToastWith("File saved at: ${prefManager.currentFileRecord}")
-                convertAndShareFile()
-
-            } else if (resultCode == RESULT_CANCELED) {
-                longToastWith("Audio recording cancelled.")
-            }
-        }
-    }
-
-
 
     private fun convertAndShareFile() {
         val convertCallback = object : IConvertCallback {
             override fun onSuccess(convertedFile: File?) {
-                longToastWith("File conversion finished!!!")
-                Tools.share(this@StatusSaverActivity, convertedFile!!.absolutePath)
+                longToastWith("File conversion finished!!!: ${convertedFile?.absolutePath}")
+                //Tools.share(this@StatusSaverActivity, convertedFile!!.absolutePath)
+                startAudioTrim(convertedFile!!)
             }
 
             override fun onFailure(error: Exception?) {
                 longToastWith("An Error occurred while converting this file")
             }
         }
+
 
         AndroidAudioConverter.with(this)
             // Your current audio file
@@ -187,6 +179,39 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
 
     }
 
+
+    private fun startAudioTrim(file: File) {
+        val colorInt = R.color.colorPrimaryDark
+        AudioCutter.with(this)
+            .setFileName(file.absolutePath)
+            .setRequestCode(AUDIO_CUTTER_CODE)
+            .setColor(colorInt)
+            .startCutter()
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                //start audio conversion
+                longToastWith("File saved at: ${prefManager.currentFileRecord}")
+                convertAndShareFile()
+
+            } else if (resultCode == RESULT_CANCELED) {
+                longToastWith("Audio recording cancelled.")
+            }
+        }else if (requestCode == AUDIO_CUTTER_CODE) {
+            if (resultCode == Activity.RESULT_OK){
+                val dataUri = data?.data
+                if (dataUri != null) {
+                    longToastWith("${dataUri.path}")
+                }
+            }else {
+                longToastWith("Audio status cancelled")
+            }
+        }
+    }
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mobigod.lib_audio_cutter" >
+
+    <application>
+        <activity android:name=".RingdroidEditActivity" />
+    </application>
+</manifest>

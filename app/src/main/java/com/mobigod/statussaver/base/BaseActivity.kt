@@ -25,8 +25,7 @@ abstract class BaseActivity<T: ViewDataBinding>: DaggerAppCompatActivity(){
         initComponent()
     }
 
-    private fun performDataBinding() {
-
+    open fun performDataBinding() {
         viewDataBinding = DataBindingUtil.setContentView(this, getLayoutRes())
     }
 

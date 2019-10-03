@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <RelativeLayout
+        android:background="@color/transparent_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_marginRight="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="20dp"
+            android:id="@+id/llLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:id="@+id/change_font_mv"
+                android:src="@drawable/ic_font"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+
+
+            <ImageView
+                android:id="@+id/text_align_mv"
+                android:src="@drawable/ic_text_align"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:layout_gravity="center_vertical"
+                android:id="@+id/text_size_dropdown"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+
+            <FrameLayout
+                android:background="@drawable/white_stroke"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
+                android:id="@+id/finish_btn"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Finish"
+                    android:layout_gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"/>
+            </FrameLayout>
+
+        </LinearLayout>
+
+
+        <EditText
+            android:id="@+id/status_ed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@android:color/transparent"
+            android:hint="Type here"
+            android:gravity="center"
+            android:layout_below="@id/llLayout1"
+            android:layout_above="@id/text_colors_rv"
+            android:inputType="textMultiLine"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textColorHint="@color/gray_color"
+            android:textSize="35sp" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_marginBottom="5dp"
+            android:id="@+id/text_colors_rv"
+            tools:listitem="@layout/colors_item_layout"
+            tools:itemCount="1"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
+
+
+    </RelativeLayout>
+</layout>

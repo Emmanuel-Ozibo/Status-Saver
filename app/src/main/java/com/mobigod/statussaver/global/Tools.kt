@@ -21,6 +21,7 @@ import com.takusemba.spotlight.target.SimpleTarget
 import android.os.Environment.getExternalStorageDirectory
 import android.os.Environment
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import java.io.*
 import java.util.*
 
@@ -59,6 +60,10 @@ object Tools {
         }
     }
 
+    fun showKeyboard(context: Context){
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    }
 
 
     fun startSpotLight(activity: Activity, target: SimpleTarget) {
