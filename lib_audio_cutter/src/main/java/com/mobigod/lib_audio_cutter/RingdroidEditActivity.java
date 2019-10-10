@@ -1424,7 +1424,9 @@ public class RingdroidEditActivity extends AppCompatActivity implements MarkerVi
         // Insert it into the database
         Uri uri = MediaStore.Audio.Media.getContentUriForPath(outPath);
         final Uri newUri = getContentResolver().insert(uri, values);
-        setResult(RESULT_OK, new Intent().setData(newUri));
+        Intent intent = new Intent();
+        intent.putExtra("new_path", outPath);
+        setResult(RESULT_OK, intent);
 
         // If Ringdroid was launched to get content, just return
         if (mWasGetContentIntent) {

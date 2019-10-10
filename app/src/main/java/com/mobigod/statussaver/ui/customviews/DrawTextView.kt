@@ -15,6 +15,17 @@ import com.elyeproj.drawtext.projectResources
 import android.graphics.Bitmap
 import kotlin.math.min
 import kotlin.math.roundToInt
+import android.graphics.Paint.DITHER_FLAG
+import android.graphics.MaskFilter
+import android.R.attr.strokeWidth
+import android.R.attr.strokeWidth
+import android.view.MotionEvent
+import kotlin.math.abs
+import android.graphics.BlurMaskFilter
+import android.graphics.EmbossMaskFilter
+import com.mobigod.statussaver.global.Tools
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0) : View(context, attrs, defStyleAttr, defStyleRes) {
@@ -27,14 +38,17 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private var drawText = TEXT
     private val drawTextCoordinate = Coordinate()
-    private var previousCanvasColorInt: Int = 0xFF9c095f.toInt()
+    private var previousCanvasColorInt: Int =  Tools.generateRandomColor()
     var isImageBackground = false
-    private var imageBackgroundBitmap: Bitmap? = null
-    private var bitmapPaint: Paint = Paint().apply {
-        isAntiAlias = true
-        isFilterBitmap = true
-        isDither = true
-    }
+    private var BRUSH_SIZE = 20f
+    val DEFAULT_COLOR = Color.RED
+    private val TOUCH_TOLERANCE = 4f
+    private var mX: Float = 0.toFloat()
+    var mY: Float = 0.toFloat()
+    private var mPath: Path? = null
+    private var mPaint: Paint? = null
+    private val paths = ArrayList<FingerPath>()
+
 
     private val srcRect = Rect().apply {
         left = getLeft()
@@ -45,11 +59,62 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
 
-
     private val valueAnimator = ValueAnimator().apply {
         duration = 500
         setEvaluator(ArgbEvaluator())
         setIntValues(0xff000000.toInt(), previousCanvasColorInt)
+    }
+
+
+    var paintBrushMode = false
+        set(value) {
+            field = value
+            initFingerPathUtils()
+            invalidate()
+        }
+
+    var paintBrushColor = DEFAULT_COLOR
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    var paintBrushSize = BRUSH_SIZE
+    set(value) {
+        field = value
+        invalidate()
+    }
+
+    private fun initFingerPathUtils() {
+        mPaint = Paint().apply {
+            isAntiAlias = true
+            isDither = true
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+        }
+
+
+//        //if this is in picture mode, pls create a canvas with the width and height of the image bitmap
+//        //else create an image with the device width and height
+//        var canvasWidth = 0
+//        var canvasHeight = 0
+//
+//        if (isImageBackground) {
+//            if (backgroundImageBmp != null) {
+//                val intArry = IntArray(2)
+//                getScaledWidthAndHeight(backgroundImageBmp!!, intArry)
+//                canvasWidth = intArry[0]
+//                canvasHeight = intArry[1]
+//            }
+//        }else {
+//            canvasWidth = resources.displayMetrics.widthPixels
+//            canvasHeight = resources.displayMetrics.heightPixels
+//        }
+//
+//        mBitmap = Bitmap.createBitmap(canvasWidth, canvasHeight, Bitmap.Config.ARGB_8888)
+//        //mCanvas = Canvas(mBitmap)
     }
 
 
@@ -230,37 +295,14 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
         canvas.drawColor(canvasColor)
         drawText = if (customText.isBlank()) TEXT else customText
 
+
         if (isImageBackground) {
-            canvas.drawColor(0xFF000000.toInt())//Black background
-            if (backgroundImageBmp != null) {
+            drawImage(canvas)
+        }
 
-                drawText = ""//todo: for now, design a more efficient way to draw all this
-
-                val ratio = min(width.toFloat() / backgroundImageBmp!!.width,
-                    height.toFloat() / backgroundImageBmp!!.height)
-
-                val width = (ratio * backgroundImageBmp!!.width).roundToInt()
-                val mheight = (ratio * backgroundImageBmp!!.height).roundToInt()
-
-                val leftRect = 0
-                val rightRect = width
-                val topRect = (height - mheight) / 2
-                val bottomRect = topRect + mheight
-
-
-                srcRect.apply {
-                    top = topRect
-                    left = leftRect
-                    right = rightRect
-                    bottom = bottomRect
-                }
-
-
-                Log.i(TAG, "Bitmap's Width: ${backgroundImageBmp?.width}, Bitmap's Height: ${backgroundImageBmp?.height}")
-                Log.i(TAG, "FINAL RECT: top: $topRect, bottom: $bottomRect, left: $leftRect, right: $rightRect")
-
-                canvas.drawBitmap(backgroundImageBmp!!, null, srcRect, null)
-            }
+        if (paintBrushMode) {
+            //draw all paint path on touch
+            drawFingerPaths(canvas)
         }
 
 
@@ -275,7 +317,6 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 
         if (width == 0 || height == 0) return
-
 
         originTextBound = calculateOriginTextBound()
 
@@ -298,13 +339,122 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
         canvas.drawText(drawText, drawTextCoordinate.x, drawTextCoordinate.y, projectResources.paintText)
     }
 
+    private fun drawFingerPaths(canvas: Canvas) {
+        //canvas.save()
+        for (fp in paths) {
+            mPaint?.color = fp.color
+            mPaint?.strokeWidth = fp.paintBrushSize
+
+            canvas.drawPath(fp.path, mPaint)
+        }
+        //canvas.restore()
+    }
+
+
+    private fun touchStart(x: Float, y: Float) {
+        mPath = Path()
+        val fp = FingerPath(paintBrushColor, paintBrushSize, mPath!!)
+        paths.add(fp)
+
+        mPath!!.reset()
+        mPath!!.moveTo(x, y)
+        mX = x
+        mY = y
+
+    }
+
+
+    private fun touchMove(x: Float, y: Float) {
+        val dx = Math.abs(x - mX)
+        val dy = Math.abs(y - mY)
+
+        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+            mPath!!.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2)
+            mX = x
+            mY = y
+        }
+    }
+
+
+    private fun touchUp() {
+        mPath!!.lineTo(mX, mY)
+    }
+
+
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val x = event!!.x
+        val y = event.y
+
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                touchStart(x, y)
+                invalidate()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                touchMove(x, y)
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                touchUp()
+                invalidate()
+            }
+        }
+
+        return true
+    }
+
+
+    private fun drawImage(canvas: Canvas) {
+        canvas.drawColor(0xFF000000.toInt())//Black background
+        if (backgroundImageBmp != null) {
+
+            drawText = ""//todo: for now, design a more efficient way to draw all this
+
+            val intArry = IntArray(2)
+            getScaledWidthAndHeight(backgroundImageBmp!!, intArry)
+
+
+            val leftRect = 0
+            val rightRect = width
+            val topRect = (height - intArry[0]) / 2
+            val bottomRect = topRect + intArry[1]
+
+
+            srcRect.apply {
+                top = topRect
+                left = leftRect
+                right = rightRect
+                bottom = bottomRect
+            }
+
+
+            Log.i(TAG, "Bitmap's Width: ${backgroundImageBmp?.width}, Bitmap's Height: ${backgroundImageBmp?.height}")
+            Log.i(TAG, "FINAL RECT: top: $topRect, bottom: $bottomRect, left: $leftRect, right: $rightRect")
+
+            canvas.drawBitmap(backgroundImageBmp!!, null, srcRect, null)
+        }
+    }
+
+
+    private fun getScaledWidthAndHeight(bitmap: Bitmap, widthHeight: IntArray) {
+        val ratio = min(width.toFloat() / bitmap.width,
+            height.toFloat() / bitmap.height)
+
+        val width = (ratio * bitmap.width).roundToInt()
+        val mheight = (ratio * bitmap.height).roundToInt()
+
+        widthHeight[0] = width
+        widthHeight[1] = mheight
+    }
+
 
     private fun Rect.calculateCenterY(): Float {
-        return Math.abs((bottom - top) / 2f)
+        return abs((bottom - top) / 2f)
     }
 
     private fun Rect.calculateCenterX(): Float {
-        return Math.abs((right - left) / 2f)
+        return abs((right - left) / 2f)
     }
 
     class Coordinate(var x: Float = 0f, var y: Float = 0f)
@@ -316,3 +466,10 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
         var fontSize: Int = 0
     }
 }
+
+
+data class FingerPath (
+    var color: Int,
+    var paintBrushSize: Float,
+    var path: Path
+)

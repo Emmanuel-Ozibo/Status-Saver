@@ -18,10 +18,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-        <FrameLayout
+
+        <com.mobigod.statussaver.ui.customviews.PanViewsLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/deco_item_frame"/>
+            android:id="@+id/pan_view_layout"/>
 
 
         <RelativeLayout

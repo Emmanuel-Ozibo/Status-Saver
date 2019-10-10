@@ -44,11 +44,6 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
     @Inject lateinit var prefManager: PreferenceManager
 
     private val TAG = "StatusSaverActivity"
-    private val READ_EXTERNAL_STORAGE_ID = 1
-    private val AUDIO_REQUEST_CODE = 0
-    private val RECORD_AUDIO_ID = 2
-    private val AUDIO_CUTTER_CODE = 3
-
 
     override fun initComponent() {
         //this is just like onCreate method
@@ -72,16 +67,9 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
             .rootView.findViewById<TextView>(R.id.version_number)
             .text = BuildConfig.VERSION_NAME
 
-
         actionBarDrawerToggle.syncState()
 
-        if(!Tools.checkPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            Tools.askReadStoragePermission(this, READ_EXTERNAL_STORAGE_ID)
-        }else{
-            //set up pager adapter
-            setUpView()
-        }
-
+        setUpView()
     }
 
     override fun hasAndroidInjector(): Boolean = true
@@ -100,152 +88,23 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item?.itemId){
-            R.id.rec_audio -> {
+            /*R.id.rec_audio -> {
                 //ask for runtime permission
-                if(!Tools.checkPermission(this, Manifest.permission.RECORD_AUDIO)){
+                if(!Tools.checkPermission (this, Manifest.permission.RECORD_AUDIO)){
                     Tools.askRecordAudioPermission(this, RECORD_AUDIO_ID)
                     return false
                 }
 
                 lunchAudioRecorder()
-            }
+            }*/
         }
         return true
-    }
-
-    private fun lunchAudioRecorder() {
-        //val folder = "${Environment.getExternalStorageDirectory()}/Status Saver Records"
-        val recordingFolder = File(Environment.getExternalStorageDirectory(), "Status Saver Records")
-
-        if (!recordingFolder.exists()) {
-            recordingFolder.mkdir()
-        }
-
-        val filePath = "${recordingFolder.absolutePath}/recorded_audio${getFileId()}.wav"
-        prefManager.currentFileRecord = filePath
-
-        val color = resources.getColor(R.color.colorPrimaryDark)
-
-        AndroidAudioRecorder.with(this)
-            // Required
-            .setFilePath(filePath)
-            .setColor(color)
-            .setRequestCode(AUDIO_REQUEST_CODE)
-
-            // Optional
-            .setSource(AudioSource.MIC)
-            .setChannel(AudioChannel.STEREO)
-            .setSampleRate(AudioSampleRate.HZ_48000)
-            .setAutoStart(false)
-            .setKeepDisplayOn(true)
-
-            // Start recording
-            .record()
-    }
-
-    private fun getFileId(): String {
-        return SystemClock.currentThreadTimeMillis().toString()
     }
 
 
     override fun getLayoutRes(): Int {
         return R.layout.activity_status_saver
     }
-
-
-    private fun convertAndShareFile() {
-        val convertCallback = object : IConvertCallback {
-            override fun onSuccess(convertedFile: File?) {
-                longToastWith("File conversion finished!!!: ${convertedFile?.absolutePath}")
-                //Tools.share(this@StatusSaverActivity, convertedFile!!.absolutePath)
-                startAudioTrim(convertedFile!!)
-            }
-
-            override fun onFailure(error: Exception?) {
-                longToastWith("An Error occurred while converting this file")
-            }
-        }
-
-
-        AndroidAudioConverter.with(this)
-            // Your current audio file
-            .setFile(File(prefManager.currentFileRecord))
-            // Your desired audio format
-            .setFormat(AudioFormat.MP3)
-            // An callback to know when conversion is finished
-            .setCallback(convertCallback)
-            // Start conversion
-            .convert()
-
-    }
-
-
-    private fun startAudioTrim(file: File) {
-        val colorInt = R.color.colorPrimaryDark
-        AudioCutter.with(this)
-            .setFileName(file.absolutePath)
-            .setRequestCode(AUDIO_CUTTER_CODE)
-            .setColor(colorInt)
-            .startCutter()
-    }
-
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 0) {
-            if (resultCode == RESULT_OK) {
-                //start audio conversion
-                longToastWith("File saved at: ${prefManager.currentFileRecord}")
-                convertAndShareFile()
-
-            } else if (resultCode == RESULT_CANCELED) {
-                longToastWith("Audio recording cancelled.")
-            }
-        }else if (requestCode == AUDIO_CUTTER_CODE) {
-            if (resultCode == Activity.RESULT_OK){
-                val dataUri = data?.data
-                if (dataUri != null) {
-                    longToastWith("${dataUri.path}")
-                }
-            }else {
-                longToastWith("Audio status cancelled")
-            }
-        }
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when (requestCode) {
-            READ_EXTERNAL_STORAGE_ID -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    //set up pager adapter
-                    setUpView()
-
-                } else {
-                    longToastWith("You must accept read external storage permission to continue")
-                    finish()
-                }
-                return
-            }
-
-            RECORD_AUDIO_ID -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    //set up pager adapter
-                    lunchAudioRecorder()
-
-                } else {
-                    longToastWith("To continue, You have to allow")
-                }
-                return
-            }
-
-            else -> {
-                // Ignore all other requests.
-            }
-        }
-    }
-
 
     companion object {
         fun start(context: Context) {

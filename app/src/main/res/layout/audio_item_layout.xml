@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <LinearLayout
+        android:background="@color/gray_light"
+        android:orientation="vertical"
+        android:layout_width="150dp"
+        android:layout_height="150dp">
+
+        <ImageView
+            android:src="@drawable/ic_music_player"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+        <TextView
+            android:layout_marginTop="5dp"
+            android:textAlignment="center"
+            tools:text="253346.mp3"
+            android:id="@+id/song_name_tv"
+            android:textColor="@color/white"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</layout>

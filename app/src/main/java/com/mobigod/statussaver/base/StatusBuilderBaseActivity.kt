@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.elyeproj.drawtext.ProjectResources
 import com.elyeproj.drawtext.projectResources
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.mobigod.statussaver.R
 
 abstract class StatusBuilderBaseActivity<T: ViewDataBinding>: BaseActivity<T>(){
@@ -27,11 +28,16 @@ abstract class StatusBuilderBaseActivity<T: ViewDataBinding>: BaseActivity<T>(){
                 supportFragmentManager
                     .beginTransaction()
                     .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-                    .replace(layoutId, fragment, fragment::class.simpleName)
+                    .replace(layoutId, fragment, tag)
                     .addToBackStack(null)
                     .commit()
             }, 250)
         }
+    }
+
+    open fun showBottomSheetFragment(fragment: BottomSheetDialogFragment, tag: String?) {
+
+        fragment.show(supportFragmentManager, tag)
     }
 
     open fun popFragment() {

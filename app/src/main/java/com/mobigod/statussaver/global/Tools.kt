@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.app.ActivityCompat
@@ -18,12 +19,10 @@ import com.takusemba.spotlight.OnTargetStateChangedListener
 import com.takusemba.spotlight.Spotlight
 import com.takusemba.spotlight.shape.Shape
 import com.takusemba.spotlight.target.SimpleTarget
-import android.os.Environment.getExternalStorageDirectory
-import android.os.Environment
-import android.util.Log
 import android.view.inputmethod.InputMethodManager
-import java.io.*
+import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 object Tools {
@@ -60,11 +59,24 @@ object Tools {
         }
     }
 
+    fun generateRandomColor(): Int{
+        val rnd = Random()
+        return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
+    }
+
     fun showKeyboard(context: Context){
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
     }
 
+
+    fun convertMillisecsToReadable(milliSecs: Long): String{
+        return String.format("%02d:%02d",
+            TimeUnit.MILLISECONDS.toMinutes(milliSecs),
+            TimeUnit.MILLISECONDS.toSeconds(milliSecs) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliSecs)
+            ))
+    }
 
     fun startSpotLight(activity: Activity, target: SimpleTarget) {
         val spotlight= Spotlight.with(activity)

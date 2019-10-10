@@ -5,6 +5,7 @@
     <color name="colorAccent">#D81B60</color>
     <color name="transparent_background">#ED000000</color>
     <color name="gray_color">#AE5A5858</color>
+    <color name="gray_light">#AEAFAFAF</color>
 
 
 <!--    DIFFERENT TEXT COLORS-->

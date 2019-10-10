@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mobigod.statussaver.R
 import com.mobigod.statussaver.databinding.DecoToolsItemLayoutBinding
 
-class DecorationToolsAdapter(val onItemClicked: (DecorationToolsItem) -> Unit): RecyclerView.Adapter<DecorationToolsAdapter.DecorationToolsVH>(){
+class DecorationToolsAdapter(val onItemClicked: (DecorationToolsItem, View) -> Unit): RecyclerView.Adapter<DecorationToolsAdapter.DecorationToolsVH>(){
     lateinit var binding: DecoToolsItemLayoutBinding
     val decoTools = mutableListOf<DecorationToolsItem>().apply {
         add(DecorationToolsItem(R.drawable.ic_palette, "Background"))
@@ -15,6 +15,7 @@ class DecorationToolsAdapter(val onItemClicked: (DecorationToolsItem) -> Unit): 
         add(DecorationToolsItem(R.drawable.ic_emoji, "Emoji"))
         add(DecorationToolsItem(R.drawable.ic_brush, "Brush"))
         add(DecorationToolsItem(R.drawable.ic_picture, "Picture"))
+        add(DecorationToolsItem(R.drawable.ic_eraser, "Eraser"))
         add(DecorationToolsItem(R.drawable.ic_edit, "Text"))
     }
 
@@ -28,7 +29,7 @@ class DecorationToolsAdapter(val onItemClicked: (DecorationToolsItem) -> Unit): 
     override fun onBindViewHolder(holder: DecorationToolsVH, position: Int) {
         holder.bindTo(position)
         holder.itemView.setOnClickListener {
-            onItemClicked(decoTools[position])
+            onItemClicked(decoTools[position], holder.itemView)
         }
     }
 

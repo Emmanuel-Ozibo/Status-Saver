@@ -1,6 +1,7 @@
 package com.mobigod.statussaver.di
 
 import com.mobigod.statussaver.ui.create.activity.StatusCreatorActivity
+import com.mobigod.statussaver.ui.create.fragment.SongsFragment
 import com.mobigod.statussaver.ui.create.fragment.TypeStatusFragment
 import com.mobigod.statussaver.ui.saver.activity.StatusSaverActivity
 import com.mobigod.statussaver.ui.saver.activity.VideoPlayerActivity
@@ -27,6 +28,9 @@ abstract class ActivityBuilder {
 
     @ContributesAndroidInjector
     abstract fun contributeTypeStatusFragmentInjector(): TypeStatusFragment
+
+    @ContributesAndroidInjector
+    abstract fun contributeSongsFragmentInjector(): SongsFragment
 
     @ContributesAndroidInjector
     abstract fun contributeVideoActivityInjector(): VideoPlayerActivity

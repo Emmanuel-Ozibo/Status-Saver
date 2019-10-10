@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/rec_audio"
-        app:showAsAction="always"
-        android:title="Record Audio"
-        android:icon="@drawable/ic_voice_status">
+<!--    <item android:id="@+id/rec_audio"-->
+<!--        app:showAsAction="always"-->
+<!--        android:title="Record Audio"-->
+<!--        android:icon="@drawable/ic_voice_status">-->
 
-    </item>
+<!--    </item>-->
 </menu>
