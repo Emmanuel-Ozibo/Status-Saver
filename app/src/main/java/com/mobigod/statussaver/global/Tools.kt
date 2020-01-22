@@ -7,6 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.app.ActivityCompat
@@ -18,14 +23,17 @@ import com.takusemba.spotlight.OnTargetStateChangedListener
 import com.takusemba.spotlight.Spotlight
 import com.takusemba.spotlight.shape.Shape
 import com.takusemba.spotlight.target.SimpleTarget
-import android.os.Environment.getExternalStorageDirectory
-import android.os.Environment
-import android.util.Log
-import java.io.*
+import android.view.inputmethod.InputMethodManager
+import com.mobigod.statussaver.ui.split.SplitVideoFile
+import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 object Tools {
+
     fun checkPermission(context: Context, permission: String) =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
@@ -34,6 +42,9 @@ object Tools {
             Manifest.permission.WRITE_EXTERNAL_STORAGE), id)
     }
 
+    fun askRecordAudioPermission(context: Activity, id: Int) {
+        ActivityCompat.requestPermissions(context, arrayOf(Manifest.permission.RECORD_AUDIO), id)
+    }
 
 
     fun decodeBitmapAsync(file: File, contentResolver: ContentResolver): Observable<Bitmap> {
@@ -46,16 +57,51 @@ object Tools {
     }
 
 
-    fun share(context: Context, path: String){
+    fun share(context: Context, path: String) {
         Intent(Intent.ACTION_SEND).apply {
             type = "video/mp4"
-            putExtra(Intent.EXTRA_STREAM, File(path).getUri())
+            putExtra(Intent.EXTRA_STREAM, File(path).getUri2())
         }.also {
             context.startActivity(Intent.createChooser(it, "Share image using"));
         }
     }
 
 
+    fun shareVideoFilesToWhatsapp(context: Context, files: ArrayList<Uri>) {
+        Intent().apply {
+            action = Intent.ACTION_SEND_MULTIPLE
+            type = "video/*"
+            `package` = "com.whatsapp"
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
+        }.also {
+            context.startActivity(it)
+        }
+    }
+
+
+
+    fun generateRandomColor(): Int{
+        val rnd = Random()
+        return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
+    }
+
+
+    fun showKeyboard(context: Context){
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    }
+
+
+
+
+    fun convertMillisecsToReadable(milliSecs: Long): String{
+        return String.format("%02d:%02d",
+            TimeUnit.MILLISECONDS.toMinutes(milliSecs),
+            TimeUnit.MILLISECONDS.toSeconds(milliSecs) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliSecs)
+            ))
+    }
 
     fun startSpotLight(activity: Activity, target: SimpleTarget) {
         val spotlight= Spotlight.with(activity)
@@ -111,70 +157,34 @@ object Tools {
     }
 
 
-    fun saveStatus(path: String) {
-        val rootDirectory = getExternalStorageDirectory()
-        val desFileName = rootDirectory.absolutePath + "/Status Saver/"
-        val newDir = File(desFileName)
-        if (!newDir.isDirectory && !newDir.exists()) {
-            val directoryCreated = newDir.mkdir()
-            if (directoryCreated) {
-                createNewFile(desFileName, path)
-            }
-        } else {
-            createNewFile(desFileName, path)
-        }
-    }
 
-
-    private fun createNewFile(desFileName: String, path: String) {
-        //create a new file
-        val savedStoryPath = desFileName + getName(path)
-        val SaveStoryFile = File(savedStoryPath)
-        if (!SaveStoryFile.isFile && !SaveStoryFile.exists()) {
-            Log.i("File Status", "Doesnt exist")
-            try {
-                val fileCreated = SaveStoryFile.createNewFile()
-                if (fileCreated) {
-                    Log.i("File Status", "File Created")
-                    copyStatusIntoFile(savedStoryPath, path)
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-        } else {
-            Log.i("File Status", "File already exists")
+    fun LunchVideoPicker(context: Activity, requestCode: Int) {
+        Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI).apply {
+            type = "video/*"
+        }.also {
+            context.startActivityForResult(it, requestCode)
         }
     }
 
 
 
-    /**
-     * @param savedStoryPath This represents the new path we want to make
-     * @param path This is where it is coming from
-     */
-    private fun copyStatusIntoFile(savedStoryPath: String, path: String) {
-        try {
-            val inComingChannel = FileInputStream(File(path)).getChannel()
-            val destinationChannel = FileOutputStream(File(savedStoryPath)).getChannel()
 
-            val id = destinationChannel.transferFrom(inComingChannel, 0, inComingChannel.size())
-            if (id > 0) {
-                Log.i("Copy Status: ", "Copied")
-                //give a notification that it has been done
-            } else {
-                Log.i("Copy Status: ", "Cant copy")
+    fun hasSubFolders(path: String): Boolean {
+        val file = File(path)
+        if (file.exists()) {
+            val allPaths = file.listFiles()
+            for (f in allPaths) {
+                if (f.isDirectory)
+                    return true
             }
-
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
 
+        return false;
+
     }
 
-    fun getName(path: String): String {
-        return UUID.randomUUID().toString()
-    }
+
+
+
+
 }

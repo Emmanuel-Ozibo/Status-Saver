@@ -1,6 +1,6 @@
 package com.mobigod.statussaver.ui.saver.fragment
 
-import android.content.Intent
+
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.AbsListView
@@ -9,12 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.himangi.imagepreview.ImagePreviewActivity
-import com.himangi.imagepreview.PreviewFile
-import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding2.view.clicks
 import com.mobigod.statussaver.R
 import com.mobigod.statussaver.base.BaseFragment
 import com.mobigod.statussaver.data.local.FileSystemManager
+import com.mobigod.statussaver.data.model.AdItemModel
+import com.mobigod.statussaver.data.model.BaseItemModel
 import com.mobigod.statussaver.data.model.MediaItemModel
 import com.mobigod.statussaver.databinding.FragmentVideosBinding
 import com.mobigod.statussaver.global.show
@@ -29,6 +29,8 @@ import io.reactivex.disposables.Disposable
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
 import java.io.File
 import javax.inject.Inject
+
+
 
 class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
 
@@ -58,10 +60,21 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
         mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide, {
                 item, _, _ ->
 
-            VideoPlayerActivity.start(context!!, item.file.absolutePath)
+            if (item is MediaItemModel){
+                VideoPlayerActivity.start(context!!, item.file.absolutePath)
+                return@MediaFilesAdapter
+            }
+
+            showToast("NAH AD YOU CLICK SO OOO")
+
         }, {
 
         })
+
+        binding.swipeToRef.setOnRefreshListener {
+            mAdapter.addAll(mutableListOf())
+            refreshLayout()
+        }
 
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.space)
 
@@ -92,6 +105,11 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
             adapter = slideInFromBottomAnimator
         }
 
+        refreshLayout()
+
+    }
+
+    private fun refreshLayout()  {
         fileSystemManager.getAllStatusVideos(object: SingleObserver<List<File>>() {
 
             override fun onSubscribe(d: Disposable) {
@@ -102,10 +120,28 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
 
             override fun onNext(t: List<File>) {
                 //populate the rv
-                mAdapter.addAll(t.map { file -> MediaItemModel(
-                    MediaItemType.VIDEO_MEDIA,
-                    file
-                ) }.toMutableList())
+                if (binding.swipeToRef.isRefreshing){
+                    binding.swipeToRef.isRefreshing = false
+                }
+
+                val l = mutableListOf<BaseItemModel>()
+
+                for (i in t) {
+                    l.add(MediaItemModel(MediaItemType.VIDEO_MEDIA, i))
+                }
+
+                val defaultAdSize = 3
+                //val x = getNumberOfAds(defaultAdSize, list)
+                for (i in 0 until defaultAdSize) {
+                    try {
+                        l.add((i * defaultAdSize) + 3, AdItemModel())
+                    }catch (e: Exception){
+                        print("There was an exception")
+                    }
+
+                }
+
+                mAdapter.addAll(l)
 
             }
 
@@ -127,7 +163,6 @@ class StatusVideosFragment: BaseFragment<FragmentVideosBinding>() {
             }
 
         }
-
     }
 
 }

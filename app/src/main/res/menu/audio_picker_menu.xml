@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/audio_file"
+        android:title="Audio File"
+        android:icon="@drawable/ic_microphone">
+
+    </item>
+
+    <item android:id="@+id/record_audio"
+        android:title="Record Audio"
+        android:icon="@drawable/ic_music_icon">
+
+    </item>
+
+
+
+</menu>

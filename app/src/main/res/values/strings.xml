@@ -4,4 +4,20 @@
     <string name="tab_text_1">Tab 1</string>
     <string name="tab_text_2">Tab 2</string>
     <string name="retry">Retry</string>
+    <string name="close_drawer">Close Drawer</string>
+    <string name="open_drawer">Open Drawer</string>
+    <string name="status_builder">Status Builder</string>
+    <string name="admob_app_id">ca-app-pub-4034907636164501~7154614872</string>
+    <string name="download_status">Download status</string>
+    <string name="create_status">Create status</string>
+    <string name="split_video">Split Video</string>
+    <string name="share_app">Share App</string>
+    <string name="invite_string">Invite Via</string>
+    <string name="folders">Folders</string>
+    <string name="enter_folder_s_name">Enter folder\'s name</string>
+    <string name="e_g_galaxy">e.g Galaxy</string>
+    <string name="set_split_duration">Duration(Seconds)</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

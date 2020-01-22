@@ -15,29 +15,33 @@ import com.mobigod.statussaver.global.getUri
 import java.io.File
 import android.os.Environment
 import android.widget.Toast
+import com.mobigod.statussaver.data.local.FileSystemManager
 import com.mobigod.statussaver.global.Tools
 import com.mobigod.statussaver.global.longToastWith
+import javax.inject.Inject
 
 
-class VideoPlayerActivity: AppCompatActivity() {
+class VideoPlayerActivity: BaseActivity<ActivityVideoPlayerBinding>() {
 
+    @Inject lateinit var fileSystemManager: FileSystemManager
     lateinit var binding: ActivityVideoPlayerBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_video_player)
+
+    override fun initComponent() {
+        binding = getBinding()
 
         val mVideoUrl = intent.getStringExtra(Constants.INTENT_VIDEO_URL)
         val file = File(mVideoUrl)
 
 
         binding.player.apply {
-            setSource(file.getUri())
+            setSource(file.getUri(this@VideoPlayerActivity))
             removeCaptions()
         }
 
         binding.saveVid.setOnClickListener {
-            Tools.saveStatus(file.absolutePath)
+            //fileSystemManager.saveStatus(file.absolutePath)
+            fileSystemManager.saveVideoFile(this, file.absolutePath)
             longToastWith("Well done, Status saved")
 
         }
@@ -46,25 +50,24 @@ class VideoPlayerActivity: AppCompatActivity() {
             Tools.share(this, mVideoUrl)
         }
 
-
     }
 
-    override fun startActivity(intent: Intent) {
-        super.startActivity(intent)
-        overridePendingTransitionEnter()
+    override fun hasAndroidInjector(): Boolean = true
+
+    override fun getLayoutRes(): Int =  R.layout.activity_video_player
+
+    override fun onPause() {
+        super.onPause()
+        binding.player.pause()
     }
 
-    override fun finish() {
-        super.finish()
-        overridePendingTransitionExit()
-    }
 
-    protected fun overridePendingTransitionEnter() {
-        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left)
-    }
+    override fun onResume() {
+        super.onResume()
+        if(!binding.player.isPlaying()){
+            binding.player.start()
+        }
 
-    protected fun overridePendingTransitionExit() {
-        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right)
     }
 
 
