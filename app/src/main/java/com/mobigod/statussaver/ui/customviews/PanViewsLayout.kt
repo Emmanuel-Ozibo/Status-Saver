@@ -3,20 +3,58 @@ package com.mobigod.statussaver.ui.customviews
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import kotlin.math.max
+import kotlin.math.min
 
 
-
-class PanViewsLayout: RelativeLayout, View.OnTouchListener{
+class PanViewsLayout: RelativeLayout, View.OnTouchListener {
 
     private var _deltaX: Float = 0f
     private var _deltaY: Float = 0f
-
     lateinit var listener: FingerListener
+    private var mScaleFactor = 1f
+    private var currentView: View? = null
+    private var isScaling = false
 
-    constructor(context: Context) : super(context){
+
+
+    private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+            isScaling = true
+            return super.onScaleBegin(detector)
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+            isScaling = false
+            super.onScaleEnd(detector)
+        }
+
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            mScaleFactor *= detector.scaleFactor
+
+            // Don't let the object get too small or too large.
+            mScaleFactor = max(0.1f, min(mScaleFactor, 5.0f))
+
+            if (currentView != null) {
+                currentView.apply {
+                    scaleX = mScaleFactor
+                    scaleY = mScaleFactor
+                }
+            }
+            ///invalidate()
+            return true
+        }
+    }
+
+    private val mScaleDetector = ScaleGestureDetector(context, scaleListener)
+
+
+
+    constructor(context: Context) : super(context) {
        // init(null, 0)
     }
 
@@ -30,6 +68,9 @@ class PanViewsLayout: RelativeLayout, View.OnTouchListener{
 
 
     override fun addView(view: View) {
+//        val layoutParams = view.layoutParams as
+//        layoutParams.addRule(CENTER_IN_PARENT)
+//        view.layoutParams = layoutParams
         super.addView(view)
         view.setOnTouchListener(this)
     }
@@ -39,7 +80,10 @@ class PanViewsLayout: RelativeLayout, View.OnTouchListener{
         val X = event.rawX
         val Y = event.rawY
 
-        when (event.action and MotionEvent.ACTION_MASK){
+        currentView = v
+        mScaleDetector.onTouchEvent(event)
+
+        when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
                 val lParams = v!!.layoutParams as LayoutParams
                 _deltaX = X - lParams.leftMargin
@@ -50,18 +94,18 @@ class PanViewsLayout: RelativeLayout, View.OnTouchListener{
                 listener.onFingerStopMove()
             }
 
-            MotionEvent.ACTION_POINTER_DOWN -> {
-            }
-            MotionEvent.ACTION_POINTER_UP -> {
-            }
+            MotionEvent.ACTION_POINTER_DOWN -> {}
+            MotionEvent.ACTION_POINTER_UP -> {}
             MotionEvent.ACTION_MOVE -> {
-                listener.onFingerMove()
-                val layoutParams = v!!.layoutParams as LayoutParams
-                layoutParams.leftMargin = (X - _deltaX).toInt()
-                layoutParams.topMargin = (Y - _deltaY).toInt()
-                layoutParams.rightMargin = -250
-                layoutParams.bottomMargin = -250
-                v.layoutParams = layoutParams
+                listener.onFingerMove(v)
+                if (!isScaling) {
+                    val layoutParams = v!!.layoutParams as LayoutParams
+                    layoutParams.leftMargin = (X - _deltaX).toInt()
+                    layoutParams.topMargin = (Y - _deltaY).toInt()
+                    layoutParams.rightMargin = - 50
+                    layoutParams.bottomMargin = - 50
+                    v.layoutParams = layoutParams
+                }
             }
         }
 
@@ -70,7 +114,7 @@ class PanViewsLayout: RelativeLayout, View.OnTouchListener{
     }
 
     interface FingerListener {
-        fun onFingerMove()
+        fun onFingerMove(view: View?)
         fun onFingerStopMove()
     }
 

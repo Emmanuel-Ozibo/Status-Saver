@@ -26,6 +26,8 @@
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tabs"
+                    app:tabSelectedTextColor="@color/white"
+                    app:tabTextColor="@color/colorPrimaryDark"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/colorPrimary" />

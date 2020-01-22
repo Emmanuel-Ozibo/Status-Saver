@@ -9,10 +9,13 @@ import androidx.databinding.ViewDataBinding
 import com.mobigod.statussaver.R
 import dagger.android.AndroidInjection
 import dagger.android.support.DaggerAppCompatActivity
+import io.reactivex.disposables.CompositeDisposable
 
 abstract class BaseActivity<T: ViewDataBinding>: DaggerAppCompatActivity(){
 
     lateinit var viewDataBinding: T
+
+    val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (hasAndroidInjector()){
@@ -56,4 +59,9 @@ abstract class BaseActivity<T: ViewDataBinding>: DaggerAppCompatActivity(){
 
     @LayoutRes
     abstract fun getLayoutRes(): Int
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
+    }
 }

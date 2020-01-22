@@ -441,10 +441,10 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val ratio = min(width.toFloat() / bitmap.width,
             height.toFloat() / bitmap.height)
 
-        val width = (ratio * bitmap.width).roundToInt()
+        val mwidth = (ratio * bitmap.width).roundToInt()
         val mheight = (ratio * bitmap.height).roundToInt()
 
-        widthHeight[0] = width
+        widthHeight[0] = mwidth
         widthHeight[1] = mheight
     }
 
@@ -459,7 +459,7 @@ class DrawTextView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     class Coordinate(var x: Float = 0f, var y: Float = 0f)
 
-    class TypedText(context: Context){
+    class TypedText(context: Context) {
         var fontRes: Int = 0
         var fontColor: Int =  ContextCompat.getColor(context, android.R.color.white)
         var typedText: String? = ""

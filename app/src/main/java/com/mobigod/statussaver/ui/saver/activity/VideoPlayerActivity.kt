@@ -35,7 +35,7 @@ class VideoPlayerActivity: BaseActivity<ActivityVideoPlayerBinding>() {
 
 
         binding.player.apply {
-            setSource(file.getUri())
+            setSource(file.getUri(this@VideoPlayerActivity))
             removeCaptions()
         }
 

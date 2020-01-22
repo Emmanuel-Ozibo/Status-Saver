@@ -12,10 +12,13 @@ import com.mobigod.statussaver.R
 import com.mobigod.statussaver.global.longToastWith
 import dagger.android.support.AndroidSupportInjection
 import dagger.android.support.DaggerFragment
+import io.reactivex.disposables.CompositeDisposable
 
 abstract class BaseFragment<T: ViewDataBinding>: DaggerFragment() {
 
     lateinit var viewDataBinding: T
+
+    val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewDataBinding = DataBindingUtil.inflate(inflater, getLayoutRes(), container, false)
@@ -45,5 +48,10 @@ abstract class BaseFragment<T: ViewDataBinding>: DaggerFragment() {
         return  viewDataBinding
     }
 
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
+    }
 
 }

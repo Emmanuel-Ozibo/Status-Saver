@@ -64,6 +64,7 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>() {
 
         val glide = Glide.with(this)
 
+
         mAdapter = MediaFilesAdapter(options, glide.asBitmap(), glide,{
                 _, items, position ->
 
@@ -90,7 +91,7 @@ class StatusImagesFragment : BaseFragment<FragmentImagesBinding>() {
             val adsB4List = mutableListOf<AdItemModel>()
             val subList = items.subList(0, position)
             subList.forEach {
-                if (it is AdItemModel){
+                if (it is AdItemModel) {
                     adsB4List.add(it)
                 }
             }

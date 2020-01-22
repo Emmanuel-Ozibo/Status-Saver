@@ -6,33 +6,27 @@ import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mobigod.statussaver.R
-import com.mobigod.statussaver.base.StatusBuilderBaseActivity
+import com.mobigod.statussaver.base.FragmentsBaseActivity
 import com.mobigod.statussaver.databinding.StatusCreatorLayoutBinding
 import com.mobigod.statussaver.ui.create.adapters.DecorationToolsAdapter
 import com.mobigod.statussaver.ui.create.fragment.TypeStatusFragment
 import com.mobigod.statussaver.ui.customviews.DrawTextView
-import android.graphics.Color
 import com.mobigod.statussaver.global.*
 import com.mobigod.statussaver.ui.create.adapters.decorators.HorizontalSpacingDecorator
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
-import java.security.SecureRandom
 import android.app.Activity
 import android.graphics.Bitmap
-import android.R.attr.path
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import com.bumptech.glide.Glide
 import android.graphics.drawable.Drawable
 import android.os.Environment
 import android.os.SystemClock
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback
 import cafe.adriel.androidaudioconverter.model.AudioFormat
@@ -46,24 +40,27 @@ import com.mobigod.lib_audio_cutter.AudioCutter
 import com.mobigod.statussaver.data.local.PreferenceManager
 import com.mobigod.statussaver.data.model.MusicFile
 import com.mobigod.statussaver.databinding.AudioItemLayoutBinding
+import com.mobigod.statussaver.databinding.EmojiLayoutBinding
 import com.mobigod.statussaver.ui.create.adapters.ColorItem
-import com.mobigod.statussaver.ui.create.adapters.ColorsAdapter
+import com.mobigod.statussaver.ui.create.adapters.EmojiItem
 import com.mobigod.statussaver.ui.create.fragment.BrushSettingsSheet
+import com.mobigod.statussaver.ui.create.fragment.EmojisFragment
 import com.mobigod.statussaver.ui.create.fragment.SongsFragment
 import com.mobigod.statussaver.ui.customviews.PanViewsLayout
 import kotlinx.android.synthetic.main.audio_item_layout.view.*
 import java.io.File
-import java.io.FileReader
 import java.lang.Exception
 import javax.inject.Inject
 
 
-class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBinding>(),
+class StatusCreatorActivity: FragmentsBaseActivity<StatusCreatorLayoutBinding>(),
     TypeStatusFragment.TypeStatusInterface,
     BrushSettingsSheet.BrushSettingsSheetListener,
     PopupMenu.OnMenuItemClickListener,
     PanViewsLayout.FingerListener,
-    SongsFragment.SongsFragmentListner {
+    SongsFragment.SongsFragmentListner,
+    EmojisFragment.EmojiFragmentListener {
+
 
     lateinit var binding: StatusCreatorLayoutBinding
     @Inject
@@ -73,7 +70,6 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
     override fun getLayoutRes() = R.layout.status_creator_layout
 
     private var textStatusFragment: Fragment? = null
-
     lateinit var decorationToolsAdapter: DecorationToolsAdapter
 
     override fun initComponent() {
@@ -99,7 +95,7 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
 
     }
 
-    override fun onFingerMove() {
+    override fun onFingerMove(view: View?) {
         binding.decoToolsRv.hide()
         //todo: show the waste basket to delete
     }
@@ -149,15 +145,10 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
                 }
 
                 "Emoji" -> {
-                    binding.drawTxtView.paintBrushColor = Color.TRANSPARENT
+                    startFragment(R.id.edit_fragment_container, EmojisFragment(), EmojisFragment::class.simpleName)
                 }
 
                 "Audio" -> {
-                    //ask for runtime permission
-                    if(!Tools.checkPermission(this, Manifest.permission.RECORD_AUDIO)){
-                        Tools.askRecordAudioPermission(this, RECORD_AUDIO_ID)
-                        return@DecorationToolsAdapter
-                    }
                     showMenu(view)
                 }
                 else -> {
@@ -167,6 +158,7 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
         }
     }
 
+
     fun showMenu(v: View) {
         PopupMenu(this, v).apply {
             setOnMenuItemClickListener(this@StatusCreatorActivity)
@@ -175,10 +167,15 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
         }
     }
 
+
     override fun onMenuItemClick(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.record_audio -> {
-                MediaStore.Audio.Media.DATA
+                //ask for runtime permission
+                if(!Tools.checkPermission(this, Manifest.permission.RECORD_AUDIO)){
+                    Tools.askRecordAudioPermission(this, RECORD_AUDIO_ID)
+                    return false
+                }
                 lunchAudioRecorder()
                 true
             }
@@ -248,6 +245,14 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
     override fun onFinishedClicked(typedText: DrawTextView.TypedText) {
         binding.drawTxtView.textTypedObj = typedText
         popFragment()
+    }
+
+
+    override fun onEmojiSelected(emojiItem: EmojiItem) {
+        popFragment()
+        val binding = EmojiLayoutBinding.inflate(LayoutInflater.from(this))
+        binding.imgEmoji.setImageDrawable(ContextCompat.getDrawable(this, emojiItem.emoji))
+        addToMiniView(binding.root)
     }
 
 
@@ -351,6 +356,9 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
     }
 
 
+    private fun addToMiniView(view: View){
+        binding.panViewLayout.addView(view)
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when(requestCode){
@@ -387,4 +395,5 @@ class StatusCreatorActivity: StatusBuilderBaseActivity<StatusCreatorLayoutBindin
             }
         }
     }
+
 }

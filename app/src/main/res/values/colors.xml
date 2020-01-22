@@ -6,6 +6,7 @@
     <color name="transparent_background">#ED000000</color>
     <color name="gray_color">#AE5A5858</color>
     <color name="gray_light">#AEAFAFAF</color>
+    <color name="transparent_background2">#BE000000</color>
 
 
 <!--    DIFFERENT TEXT COLORS-->
@@ -24,5 +25,8 @@
     <color name="lava">#808588</color>
     <color name="orchid">#af69ee</color>
     <color name="flax">#eedc82</color>
+    <color name="grey200">#D6D6D6</color>
+    <color name="black54">#1A1919</color>
+
 
 </resources>

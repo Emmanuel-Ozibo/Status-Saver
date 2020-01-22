@@ -10,6 +10,9 @@ import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import android.provider.MediaStore
+import androidx.core.content.FileProvider
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import java.io.File
 
 
@@ -31,6 +34,10 @@ fun <E>MutableList<E>.removeAllItems(){
     this.forEach {
         this.remove(it)
     }
+}
+
+fun CompositeDisposable.plus(disposable: Disposable) {
+    add(disposable)
 }
 
 
@@ -56,11 +63,14 @@ fun View.hideWithTime(timemilli: Long){
 fun View.isShowing() = visibility == View.VISIBLE
 
 
-fun File.getUri() =
+fun File.getUri(context: Context) =
+    FileProvider.getUriForFile(context, "${context.packageName}.provider", this)
+
+fun File.getUri2() =
     Uri.fromFile(this)
 
 fun File.getImageBitmap(contentResolver: ContentResolver): Bitmap {
-    val uri = this.getUri()
+    val uri = this.getUri2()
     return MediaStore.Images.Media.getBitmap(contentResolver, uri)
 }
 

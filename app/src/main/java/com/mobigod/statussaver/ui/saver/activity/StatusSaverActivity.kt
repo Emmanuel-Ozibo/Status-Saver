@@ -59,15 +59,15 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
             getString(R.string.admob_app_id))
 
 
-        val actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.drawerLayout,
-            binding.ssaverToolbar.toolbar,
-            R.string.open_drawer, R.string.close_drawer)
-
-        binding.navView.getHeaderView(0)
-            .rootView.findViewById<TextView>(R.id.version_number)
-            .text = BuildConfig.VERSION_NAME
-
-        actionBarDrawerToggle.syncState()
+//        val actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.drawerLayout,
+//            binding.ssaverToolbar.toolbar,
+//            R.string.open_drawer, R.string.close_drawer)
+//
+//        binding.navView.getHeaderView(0)
+//            .rootView.findViewById<TextView>(R.id.version_number)
+//            .text = BuildConfig.VERSION_NAME
+//
+//        actionBarDrawerToggle.syncState()
 
         setUpView()
     }
@@ -86,8 +86,9 @@ class StatusSaverActivity: BaseActivity<ActivityStatusSaverBinding>() {
         return true
     }
 
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId){
+        when(item?.itemId) {
             /*R.id.rec_audio -> {
                 //ask for runtime permission
                 if(!Tools.checkPermission (this, Manifest.permission.RECORD_AUDIO)){

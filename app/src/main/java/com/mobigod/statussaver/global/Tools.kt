@@ -8,6 +8,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.app.ActivityCompat
@@ -20,9 +24,12 @@ import com.takusemba.spotlight.Spotlight
 import com.takusemba.spotlight.shape.Shape
 import com.takusemba.spotlight.target.SimpleTarget
 import android.view.inputmethod.InputMethodManager
+import com.mobigod.statussaver.ui.split.SplitVideoFile
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 object Tools {
@@ -53,21 +60,39 @@ object Tools {
     fun share(context: Context, path: String) {
         Intent(Intent.ACTION_SEND).apply {
             type = "video/mp4"
-            putExtra(Intent.EXTRA_STREAM, File(path).getUri())
+            putExtra(Intent.EXTRA_STREAM, File(path).getUri2())
         }.also {
             context.startActivity(Intent.createChooser(it, "Share image using"));
         }
     }
+
+
+    fun shareVideoFilesToWhatsapp(context: Context, files: ArrayList<Uri>) {
+        Intent().apply {
+            action = Intent.ACTION_SEND_MULTIPLE
+            type = "video/*"
+            `package` = "com.whatsapp"
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
+        }.also {
+            context.startActivity(it)
+        }
+    }
+
+
 
     fun generateRandomColor(): Int{
         val rnd = Random()
         return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
     }
 
+
     fun showKeyboard(context: Context){
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
     }
+
+
 
 
     fun convertMillisecsToReadable(milliSecs: Long): String{
@@ -130,5 +155,36 @@ object Tools {
             })
             .build()
     }
+
+
+
+    fun LunchVideoPicker(context: Activity, requestCode: Int) {
+        Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI).apply {
+            type = "video/*"
+        }.also {
+            context.startActivityForResult(it, requestCode)
+        }
+    }
+
+
+
+
+    fun hasSubFolders(path: String): Boolean {
+        val file = File(path)
+        if (file.exists()) {
+            val allPaths = file.listFiles()
+            for (f in allPaths) {
+                if (f.isDirectory)
+                    return true
+            }
+        }
+
+        return false;
+
+    }
+
+
+
+
 
 }

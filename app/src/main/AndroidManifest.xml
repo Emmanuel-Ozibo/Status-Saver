@@ -19,7 +19,8 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".ui.splash.StatusDecisionActivity"/>
+        <activity android:name=".ui.splash.StatusDecisionActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -69,6 +70,22 @@
 
         <activity android:name=".ui.create.activity.StatusCreatorActivity"
             android:theme="@style/ClearFullScreen"/>
+
+
+        <activity android:name=".ui.split.SplitVideoActivity"
+            android:theme="@style/AppTheme.NoActionBar2"/>
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
+
 
     </application>
 

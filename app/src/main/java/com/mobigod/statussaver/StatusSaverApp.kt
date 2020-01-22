@@ -2,6 +2,8 @@ package com.mobigod.statussaver
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
+
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
 import com.mobigod.statussaver.di.DaggerAppComponent
@@ -16,6 +18,7 @@ import cafe.adriel.androidaudioconverter.AndroidAudioConverter
 
 
 class StatusSaverApp: MultiDexApplication(), HasAndroidInjector {
+    private val TAG = StatusSaverApp::class.simpleName
 
     @Inject
     lateinit var activityDispatchingAndroidInjector: DispatchingAndroidInjector<Any>
@@ -31,8 +34,10 @@ class StatusSaverApp: MultiDexApplication(), HasAndroidInjector {
         AndroidAudioConverter.load(this, object : ILoadCallback {
             override fun onSuccess() {
                 // Great!
+                Log.i(TAG, "FFMPEG Loaded successfully")
             }
             override fun onFailure(error: Exception) {
+                Log.i(TAG, "FFMPEG ERR!!!!: ${error.message}")
                 // FFmpeg is not supported by device
             }
         })

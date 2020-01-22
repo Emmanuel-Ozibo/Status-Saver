@@ -9,7 +9,7 @@ import com.elyeproj.drawtext.projectResources
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.mobigod.statussaver.R
 
-abstract class StatusBuilderBaseActivity<T: ViewDataBinding>: BaseActivity<T>(){
+abstract class FragmentsBaseActivity<T: ViewDataBinding>: BaseActivity<T>() {
 
 
     override fun performDataBinding() {
@@ -19,7 +19,8 @@ abstract class StatusBuilderBaseActivity<T: ViewDataBinding>: BaseActivity<T>(){
 
 
     /**Always start a fragment with a tag*/
-    open fun startFragment(layoutId: Int, fragment: Fragment, tag: String?) {
+    open fun startFragment(layoutId: Int, fragment: Fragment, tag: String?,
+                           animIn: Int = R.anim.fade_in, animOut: Int = R.anim.fade_out) {
         val frag = supportFragmentManager.findFragmentByTag(tag)
         if (frag != null) {
             supportFragmentManager.popBackStackImmediate(tag, 0)
@@ -27,7 +28,7 @@ abstract class StatusBuilderBaseActivity<T: ViewDataBinding>: BaseActivity<T>(){
             Handler().postDelayed({
                 supportFragmentManager
                     .beginTransaction()
-                    .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                    .setCustomAnimations(animIn, animOut)
                     .replace(layoutId, fragment, tag)
                     .addToBackStack(null)
                     .commit()
@@ -43,4 +44,7 @@ abstract class StatusBuilderBaseActivity<T: ViewDataBinding>: BaseActivity<T>(){
     open fun popFragment() {
         supportFragmentManager.popBackStack()
     }
+
+    open fun hasOneItemOnBackStack()
+            = supportFragmentManager.backStackEntryCount == 1
 }

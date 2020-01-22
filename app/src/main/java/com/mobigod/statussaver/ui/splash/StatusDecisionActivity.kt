@@ -1,6 +1,7 @@
 package com.mobigod.statussaver.ui.splash
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +10,7 @@ import com.mobigod.statussaver.global.Tools
 import com.mobigod.statussaver.global.longToastWith
 import com.mobigod.statussaver.ui.create.activity.StatusCreatorActivity
 import com.mobigod.statussaver.ui.saver.activity.StatusSaverActivity
+import com.mobigod.statussaver.ui.split.SplitVideoActivity
 import kotlinx.android.synthetic.main.activity_status_decision.*
 
 class StatusDecisionActivity : AppCompatActivity() {
@@ -23,7 +25,6 @@ class StatusDecisionActivity : AppCompatActivity() {
             Tools.askReadStoragePermission(this, READ_EXTERNAL_STORAGE_ID)
         }
 
-
         download_status.setOnClickListener {
             StatusSaverActivity.start(this)
         }
@@ -31,6 +32,24 @@ class StatusDecisionActivity : AppCompatActivity() {
         create_status.setOnClickListener {
             StatusCreatorActivity.start(this)
         }
+
+        split_video.setOnClickListener {
+            SplitVideoActivity.start(this)
+        }
+
+        share_app_link.setOnClickListener {
+                val textMessage = "Hello dear, I have been using ${getString(R.string.app_name)} for FREE to prepare " +
+                        "for my exams and it has been awesome \n" +
+                        "download it now from google playstore via this link ${"http://play.google.com/store/apps/details?id=com.emeecodes.schoolprep"}"
+                Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+                    putExtra(Intent.EXTRA_TEXT, textMessage)
+                    type = "text/plain"
+                    startActivity(Intent.createChooser(this, getString(R.string.invite_string)))
+                }
+        }
+
     }
 
 
@@ -49,4 +68,6 @@ class StatusDecisionActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }

@@ -42,6 +42,7 @@ dependencies {
     implementation "com.google.dagger:dagger-android:${rootProject.dagger_version}"
     implementation "com.google.dagger:dagger-android-support:${rootProject.dagger_version}"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     kapt "com.google.dagger:dagger-android-processor:${rootProject.dagger_version}"
     kapt "com.google.dagger:dagger-compiler:${rootProject.dagger_version}"
 
@@ -67,6 +68,7 @@ dependencies {
     implementation "com.github.takusemba:spotlight:${rootProject.spotlight_version}"
     implementation "com.github.adrielcafe:AndroidAudioConverter:${rootProject.audio_converter}"
     api "com.theartofdev.edmodo:android-image-cropper:${rootProject.image_cropper}"
+//    implementation "com.android.support:support-emoji-bundled:28.0.0"
 
 
     //Admob
